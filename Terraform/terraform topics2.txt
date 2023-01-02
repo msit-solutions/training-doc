@@ -1,0 +1,22 @@
+
+Creation of the s3 bucket using terraform terrfaorm script
+===========================================================
+
+main.tf 
+-----------
+provider "aws" {
+  region = "us-east-2"
+  access_key = "enter the access_key here"
+  secret_key = "enter the secret_key here"
+}
+
+# resource create s3 bucket
+resource "aws_s3_bucket" "mybucket"{
+ bucket = "new-s3-storage"
+ acl    = "private"
+  
+ tags = {
+  Name  = "my_bucket"
+  }
+}
+
