@@ -1,0 +1,77 @@
+ Calculation of the  cidr range 
+
+ network protocol
+Ipv4 and Ipv6 
+Ipv4 has the around 4 billion unique ips and it has highest 2^32 address
+Ipv6 has the around 340 undecillion IP addresses and It has highest 2^128 address
+ex:
+           10.0.0.0/24  is address we can calculate the ip's present 
+
+                                32 is the final address
+32 - 24 = 8  ===>  2^8 =256 ip address
+
+ip address range - 10.0.0.0
+                   10.0.0.1
+                   10.0.0.2
+                       "
+                       "
+                    10.0.0.255 address we can get for (/24)
+
+Ex: SUBNET-1
+  for the same vpc we have to create the ip address lesss than the vpc range
+
+    vpc range - 10.0.0.0/24
+    subnet1 should be - 10.0.0.0/25
+     32 - 25 = 7 ===> 2^7 = 128 ip address for the subnet 
+ip address range - 10.0.0.0
+                   10.0.0.1
+                   10.0.0.2
+                       "
+                       "
+                    10.0.0.127 
+
+Ex: SUBNET-2
+we want to  create  subnet2 the cidr should be less than subnet1 
+means 10.0.0.0/26 
+32 - 26 = 6 ==> 2^6 = 64 ip address 
+
+ip address range - 10.0.0.0/26
+                 -  10.0.0.0  
+                    10.0.0.1
+                    10.0.0.2
+                       "
+                       "
+                     10.0.0.63
+
+
+
+
+
+
+
+
+
+
+
+sudo mkdir /etc/telegraf
+sudo sh -c 'docker run --rm telegraf:1.23.2-alpine --input-filter execd --output-filter cloud_pubsub config > /etc/telegraf/telegraf.conf'
+
+
+ sudo docker run -d --name telegraf1 -v $(pwd)/etc/telegraf:/etc/telegraf/telegraf.conf   5288c877257e  (image name/image-id)
+
+ sudo docker run -d --name telegraf1 -v /pathof the host file :/pathof the container file 
+
+ sudo vi /etc/telegraf/telegraf.conf 
+
+
+
+
+sudo docker run -d --name telegraf1 -v /etc/telegraf:/etc/telegraf  5288c877257e
+
+
+
+vi /etc/telegraf/telegraf.conf | grep -A  "inputs.execd"
+=================================================================
+sudo docker 
+
+sudo docker run -d --name telegraf2 -v /etc/telegraf:/etc/telegraf telegraf
