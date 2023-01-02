@@ -1,0 +1,210 @@
+Docker
+=================
+
+Virtualization
+====================
+Here we have a bare metal(H/W) on top of which we install
+a host OS and on the hsot OS we install a s/w application
+called as hypervisor .
+This hypervisor allows us to run 
+multiple OS as Guest OS and on these guest OS we can install
+what ever application we want
+
+The disadvantage is that the applications running on guest OS
+have to pass through many layer s to access the H/W resources
+
+
+Containerization
+=====================
+Here we have a bare metal(H/W) on top of which we install the
+host OS and on the host OS we install an application called
+as Docker Engine .
+On the Docker Engine we can install all our
+applications in the form of "containers"
+
+Using docker we achieve "Process Isolation" ie  applications
+are designed to work on specific OS's and docker removes that 
+dependency and allows us to run any application in the form of
+a container on and host OS
+
+Docker can be used at all stages of "Build--->Ship--->Run"
+ie Using docker we can create dev environments
+testing and production environments
+
+reference doc: https://www.zdnet.com/article/what-is-docker-and-why-is-it-so-darn-popular/
+
+
+Docker comes in 2 flavours
+1 Docker CE (Community Edition)
+2 Docker EE (Enterprise Edition)
+
+Setup of docker on Windows or Mac
+=========================================
+1 Download docker desktop from
+  https://www.docker.com/products/docker-desktop
+
+2 Install it
+
+3 Once docker is installed we can use "PowerShell" on Windows
+  and "Terminal" on Mac to run the docker commands
+===============================================
+Setup of Docker on an Ubuntu Linux Machine
+=================================================
+1 Create an Ubuntu linux instances on AWS cloud
+
+2 Connect to that instance using gitbash
+
+3 To install docker
+  a) Open https://get.docker.com and Copy paste the below two commands
+
+     curl -fsSL https://get.docker.com -o get-docker.sh
+     sh get-docker.sh
+
+======================================================================
+Docker Components
+=======================
+Images and Containers
+===========================
+A Docker image is a combination of bins/libs that are necessary for a
+s/w application to work
+
+A Docker container is a running instance of a docker image.Any number of
+containers can be created from one docker images
+
+
+Docker Client: This is the CLI of docker where the user can execute the
+docker commands, The docker client accepts these commands and passes them
+to a background process called "docker daemon"
+
+Docker daemon: This process accepts the commands coming from the docker client
+and routes them to work on docker images or containers or the docker registry
+
+Docker registry: This is the cloud site of docker where docker images are
+stored. This is of two types
+1 Public Registry( hub.docker.com)
+2 Private Registry(Setup on one of our local servers)
+
+referece doc:https://docs.docker.com/get-started/overview/
+===========================================================================
+
+Important docker commands
+==============================
+Working on docker images
+===============================
+1 To pull a docker image
+  docker pull image_name
+
+2 To search for a docker images
+  docker search image_name
+
+3 To upload an image into docker hub
+  docker push image_name
+
+4 To see the list of images that are downloaded
+  docker images
+  or
+  docker image ls
+
+5 To get detailed info about a docker image
+  docker image inspect image_name/image_id
+
+6 To delete a docker image that is not linked to any container
+  docker rmi image_name/image_id
+
+7 To delete a image that is linked to a container
+  docker rmi -f image_name/image_id
+
+8 To save the docker image as a tar file
+  docker save image_name > tarfilename
+
+9 To untar this tar file and get  image
+  docker load tarfile_name
+
+10 To delete all image
+   docker system prune -af
+
+11 To create an image from a container
+   docker commit container_name/container_id image_name
+
+12 To create a container from a dockerfile
+   docker build -t image_name .
+
+=========================================================
+====================
+13 To see the list of running containers
+   docker container ls 
+
+14 To see all the containers (running and stopped)
+   docker ps -a
+
+15 To stop a running container
+   docker stop container_name/container_id
+
+16 To start a stoped container
+   docker start container_name/container_id
+
+17 To delete a stopped container
+   docker rm container_name/container_id
+
+18 To delete a running container
+   docker rm -f container_name/container_id
+
+19 To restart container
+   docker restart container_name/container_id
+
+20 To stop all the running container
+   docker stop $(docker ps -aq)
+
+21 To delete all stopped containers
+   docker rm $(docker ps -aq)
+
+22 To delete all containers (running and stopped) 
+   docker rm -f $(docker ps -aq)
+
+23 To see the logs generated by a container
+   docker logs container_name/container_id
+
+24 To see the ports used by a container
+   docker port container_name/container_id
+
+25 To create a container
+   docker run image_name/image_id
+   run command options
+   ===========================
+   --name: This is used to give a name to the container
+   -d : Used to run the container in detached mode(ie it runs in the background)
+   -it: Used to open interactive terminal in the container
+   -e : Used to pass environment varibales to the container
+   -v : Used to attach an external directory or device as a volume
+   --volumes-from: Used to share the vailumes between multiple containers  
+   -p : Used for port mapping This will map the container port with the host
+        port Eg: -p 8080:80 Here 80 is the container port (internal port) and
+        8080 is the host port(external port)
+   -P : Used for automatic port mapping where the container port will be mapped
+        with a host port that is greater than 30000
+   --restart: This will restart the container whenver the host machine restart
+   --rm: Used to delete a container on exit form the container
+   --link : Used to create a micro services architecture where multiple containers
+            are linked with each other
+   --network: USed to start a container on a specific docker network
+   -m : Used to specify the max amout of memory that a container can use
+   -c: Used to specify the max percentage of cpu that a container can use
+
+26 To rename a container
+   docker container rename container_name/container_id new_container_name
+
+27 To run any process in a container from outside the container
+   docker exec -it container_id/container_name process_name
+   Eg: To run the bash process in a container
+   docker exec -it container_id/container_name bash
+
+28 To come out of a container without exit
+   ctrl+p,ctrl+q
+
+29  To go back into a container from where the interactive terminal is running
+    docker attach container_id/container_name
+
+30  To see the processes runnign in a container
+    docker container container_id/container_name top
+
+===================================================================

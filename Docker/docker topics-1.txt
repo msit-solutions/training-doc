@@ -1,0 +1,275 @@
+
+UseCase 
+================
+Create an nginx container in detached mode and name it webserver
+docker run --name webserver -d -p 9999:80 nginx
+
+To access  ginx from browser
+public_ip_of_dockerhost:9999
+
+======================================================================
+UseCase
+==============
+Create a tomcat container and open it from browser
+docker run  --name appserver -d -P tomee
+
+To see the port used by the tomcat
+docker port tomcat
+
+To access tomcat from browser
+public_ip_of_dockerhost:8080
+
+=======================================================================
+UseCase
+=========
+Create a  centos container and open interactive terminal in it
+docker run --name c1 -it centos
+
+To come out of the centos container
+exit
+docker run busybox
+
+=====================================================================
+Creating a multi container architecture(microservices architecture)
+=====================================================================
+Various types of development and testing environments can be
+created using docker in the following ways
+
+1  --link  option (depricated)
+2  docker-compose
+3 Docker networking
+
+4 Python Scripts
+5 Ansible
+
+--link Option: This is a docker run command option and it is
+depricated.
+
+UseCase 1                
+=============
+Create 2 busybox containers and link them
+
+1 Create a busybox container
+  docker run  --name c1 -it busybox
+
+2 To come out of the container without exit
+  ctrl+p,ctrl+q
+
+3 Create another busybox container and link it with the c1 container
+  docker run  --name c2 --link c1:c2 -it busybox
+
+4 Check if c2 can ping to c1
+  ping c1
+
+======================================================================
+Setup LAMP architecture 
+
+lamp 
+l -linux : a- application server( apache) m - database ( mysql) p - script lanuage ( php)
+========================
+1 Create mysql container
+  docker run --name mydb -d -e MYSQL_ROOT_PASSWORD=temp mysql
+
+2 Create an apache container and link with mysql container
+  docker run --name apache -d -p 9999:80 --link mydb:mysql httpd
+
+3 Create a php container and link with mysql and apache containers
+  docker run --name php -d --link mydb:mysql --link apache:httpd php:7.2-apache
+
+4 To check if php container is linked with apache and mysqldocker image 
+  docker inspect php
+=================================================================
+
+Docker compose
+=======================
+The disadvantage of "link" option is it is depricated and 
+the same individual command have to be given multiple times
+to setup similar architectures.
+To avoid this we can use docker compose
+Docker compose uses yml files to setup the multu container 
+architecture and these files can be resused any number of time
+
+Setup of docker compose
+
+1 Download the docker compose s/w
+  sudo curl -L "https://github.com/docker/compose/releases/download/1.29.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+
+2 Give execute permissions on it
+  sudo chmod +x /usr/local/bin/docker-compose
+
+3 To check if docker compose is installed or not
+  docker-compose --version
+
+
+Url: https://docs.docker.com/compose/install/
+================================================================
+UseCase
+==============
+Create a docker compose file to setup the LAMP architecture 
+vim lamp.yml
+---
+version: '3.0'
+
+services:
+ mydb:
+  image: mysql
+  environment:
+   MYSQL_ROOT_PASSWORD: temp
+
+ apache:
+  image: httpd
+  ports:
+   - 8989:80
+  links:
+   - mydb:mysql
+
+ php:
+  image: php:7.2-apache
+  links:
+   - mydb:mysql
+   - apache:httpd
+...
+
+To create containers from the above file
+docker-compose -f lamp.yml up -d
+
+To delete the containers
+docker-compose -f lamp.yml down
+==========================================
+
+
+Volumes
+=============
+Containers are ephemeral but the data processed by the container
+should be persistent.This can be done using volumes
+
+Volumes are categorised into 3 types
+1 Simple docker volume
+2 Sharable docker volumes
+3 Docker Volume containers
+
+===========================================================================
+Simple Docker Volumes
+============================
+They are used only for preserving the data on the host machine
+even when the container is deleted
+
+1 Create a folder /data
+  mkdir /data
+
+2 Create an ubuntu container and mount the /data as volume
+  docker run --name u1 -it -v /data ubuntu
+
+3 In the ubuntu container go into dat folde and create some files
+  cd data
+  touch file1 file2
+  exit
+
+4 Identify the location where the volume data is stored
+  docker inspect u1
+  Search for "Mounts" section and copy the "Source" path
+
+/var/lib/docker/volumes/7b28dc5d981d1f4e72ba5580bc913a023a6b0516c2855dc7564a59ab6f1685d9/_data
+
+
+5 Delete the ubuntu container
+  docker rm -f u1
+
+6 Check if the data is still present
+  cd "source_path_from_step_4"
+  ls
+========================================================================
+======================================================================
+Sharable Docker volumes
+============================
+These volumes are sharabale between multiple containers
+
+Create 3 centos containers c1,c2,c3.
+Mount /data as a volume on c1 container ,c2 should use the volume
+used by c1 , c3 should use the volume used by c2
+
+
+
+1 Create a centos container c1 and mount /data 
+  cd data
+
+2 Go into the data folder create files in data folder
+  cd data
+  touch f1 f2
+
+3 Create another centos container c1 and attach the volume  
+    docker run --name c1 -it -v data/ centos
+
+4  Come out of the container without exit
+   ctlr+p,ctlr+q
+
+5 Create another centos container c2 and it should use the volumes used by c1
+  docker run --name c2 -it --volumes-from c1 centos
+  
+6 In the c2 container go into data folder and create some file
+  cd data
+  touch f3 f4
+
+7 Come out of the container without exit
+  ctlr+p,ctlr+q
+
+8 Create another centos container c3 and it should use the volume used by c2
+  docker run --name c3 -it --volumes-from c2 centos
+
+9 In the c3 container go into data folder and create some files
+  cd data
+  touch f5 f6
+
+10 Come out of the container without exit
+   ctlr+p,ctlr+q
+
+11 Go into any of the 3 contianers and we will see all the files
+   docker attach c1
+   cd /data
+   ls
+   exit
+
+12 Identify the location  where the mounted data is stored
+   docker inspect c1
+   Search for "Mounts" section and copy the "Source" path
+
+13 Delete all containers
+   docker rm -f c1 c2 c3
+
+14 Check if the files are still present
+   cd "source_path_from"step12"
+   ls
+
+
+======================================================================
+
+
+Docker volume containers
+----------------------------
+These volumes are bidirectoinal ie the changes done on host
+will be reflected into container and changes done by container
+will be reflected to host machine
+
+1 Create a volume 
+  docker volume create myvolume
+
+2 To check the location where the mounted the volume works
+  docker volume inspect myvolume
+
+3 Copy the path shown in "MountPoint" and cd to that Path
+  cd "MountPoint"t
+
+4 Create few files here
+  touch file1 file2
+
+5 Create a centos container and mount the above volume into the tmp folder
+  docker run --name c1 -it -v myvolume:/tmp centos
+
+6 Change to tmp folder and check for the files
+  cd /tmp
+  ls
+  If we create any files here they will be reflected to host machine
+  And these files will be present on the host even after deleting the 
+  container.
+
+==================================================================

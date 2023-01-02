@@ -1,0 +1,258 @@
+Creating customsied docker images
+=========================================
+This can be done in 2 ways
+1 Using docker commit command
+2 Using dockerfile
+
+Using the docker commit command
+====================================
+UseCase
+============
+Create an ubuntu container and install some s/w's in it
+Save this container as an image and later create a new container
+from the newly created image.We will find all the s/w's that we 
+installed.
+
+1 Create an ubuntu container
+  docker run --name u1 -it ubuntu
+
+2 In the container update the apt repo and install s/w's
+  apt-get update
+  apt-get install -y git
+
+3 Check if git is installed or not
+  git --version
+  exit
+
+4 Save the customised container as an image
+  docker commit u1 myubuntu
+
+5 Check if the new image is created or not
+  docker images
+
+6 Delete the previousely create ubuntu container
+  docker rm -f u1
+7 Create an new container from the above created image 
+  docker run --name u1 -it myubuntu
+
+8 Check for git 
+  git --version
+
+=========================================================================
+
+Dockerfile
+===================
+Dockerfile uses predefined keyword to create customsied
+docker images.
+
+Important keyword in dockerfile
+===================================
+FROM : This is used to specify the base image from where a
+customised docker image has to be created
+
+MAINTAINER : This represents the name of the organization or the
+author that has created this dockerfile
+
+RUN :Used to run linux commands in the container
+     Generally it used to do s/w installtion or
+     running scripts
+
+USER : This is used to specify who should be the default user
+       to login into the container
+
+COPY : Used to copy files from host to the customised image that
+       we are creating
+
+ADD : This is similar to copy where it can copy files from host
+      to image but ADD can also downlaod files from some remote server
+
+EXPOSE : USed to specify what port should be used by the container
+
+VOLUME : Used for automatic volume mounting ie we will have a volume
+         mounted automatically when the container start
+
+WORKDIR : Used to specify the default working directory of the container
+
+
+
+ENV : This is used to specify what environment varibles should
+     be used
+
+CMD : USed to run the default process of the container from outside
+      
+ENTRYPOINT : This is also used to run the default process of the container
+             
+LABEL: Used to store data about the docker image in key value pairs
+
+SHELL : Used to specify what shell should be by default used by the image
+
+-------------------------------------------------------------------------
+UseCase
+===========
+Create a dockerfile to use nginx as base image and specify
+the maintainer as hari
+
+1 Create docker file
+vim dockerfile
+
+FROM nginx
+MAINTAINER hari
+
+2 To create an image from this file
+  docker build -t mynginx .
+
+3 Check if the image is created or not
+  docker images
+
+-----------------------------------------------------------------------
+UseCase
+==============
+Create a dockerfile from ubuntu base image and install 
+git in it
+
+1 Create dockerfile
+  vim dockerfile
+
+  FROM ubuntu
+  MAINTAINER hari
+  RUN apt update
+  RUN apt install -y git
+
+2 Create an image from the above file
+  docker build -t myubuntu .
+
+3 Check if the new image is created
+  docker images
+
+4 Create a container from the new image and it should have git installed
+  docker run  --name u1 -it myubuntu
+  git --version
+
+===============================================================================
+Docker Networking
+=========================
+Docker supports 4types of networks
+1 Bridge - default network of docker when you create a container or multiple containers  on host machine 
+2 Host - when you want to create only one container 
+3 null - when you want to create a isolated network ie; the containers cannot communicate with other containers and the host machine 
+4 Overlay - it is powerful network and in container orchestration
+
+
+UseCase
+===============
+Create 2 bridge networks tech1 and tech2
+Create 3 busybox containers c1,c2 and c3
+c1 and c2 should run on tech1 network and should ping each other
+c3 should run on tech2 network and it should not be able to ping c1 or c2
+Now put c2 on tech2 network,since c2 is on both tech1 and tech2
+networks it should be able to ping to both c1 and c3
+but c1 and c3 should not ping each other directly
+
+1 Create 2 bridge networks
+  docker network create --driver bridge tech1
+  docker network create --driver bridge tech2
+
+2 Check the list of available networks
+  docker network ls
+
+3 Create a busybox container c1 on tech1 network
+  docker run --name c1 -it --network tech1 busybox
+  Come out of the c1 container without exit ctrl+p,ctrl+q   
+
+4 Identify the ipaddress of c1
+  docker inspect c1
+   go to network section and see what is network attached and copy the ip-address and paste for the further use 
+    ( 172.18.0.2)  172.21.0.2
+5 Create another busybox container c2 on tech1 network
+  docker run --name c2 -it --network tech1 busybox
+  ping ipaddress_of_c1    (It will ping)
+  Come out of the c2 container without exit ctrl+p,ctrl+q
+
+6 Identify the ipaddress of c2
+  docker inspect c2
+   go to network section and see what is network attached and copy the ip-address and paste for the further use 
+    (172.18.0.3)
+7 Create another busybox container c3 on tech2 network
+  docker run --name c3 -it --network tech2 busybox
+  ping ipaddress_of_c1 (or) container_name   (It should not ping)
+  ping ipaddress_of_c2 (or) container_name  (It should not ping)
+  Come out of the c3 container without exit ctrl+p,ctrl+q
+
+8 Identify the ipaddress of c3
+  docker inspect c3 
+    go to network section and see what is network attached and copy the ip-address and paste for the further use 
+    (172.19.0.2
+9 Now attach tech2 network to c2 container
+  docker network connect tech2 c2
+
+10 Since c2 is now on both tech1 and tech2 networks it should ping
+   to both c1 and c3 containers
+   docker attach c2
+   ping ipaddress_of_c1  (It should  ping) ctrl+c 
+   ping ipaddress_of_c3  (It should  ping)
+   Come out of the c2 container without exit ctrl+p,ctrl+q
+
+11 But c1 and c3 should not ping each other
+   docker attach c3
+   ping ipaddress_of_c1  (It should not ping)
+
+
+Note: To create network with a specific subnet range
+docker network create --driver bridge --subnet=192.168.2.0/24 tech3
+
+            
+
+========================================================================
+=========================================================================
+Working on docker registry
+==========================
+This is the location where the docker images are saved
+This is of 2 types
+1 Public registry
+2 Private regsitry
+
+UseCase
+Create a customised centos image and upload into the public registry
+
+1 Signup into hub.docker.com
+
+2 Create a customsied centos image
+  a) Create a centos container and install git init
+     docker run --name c1 -it ubuntu
+       apt install -y git maven
+    exit
+
+  b) Save this container as an image
+     docker commit c1 docker_username/mycentos
+
+3 Login into dockerhub
+  docker login
+  Enter username and password of dockerhub
+
+4  Push the customised image
+   docker push docker_username/mycentos
+
+
+========================================================================
+Private Registry
+=====================
+This can be created using a docker image called as "registry"
+We can start this as a container and it will allow us to 
+push images into the registry
+
+1 Create registry as a container
+  docker run --name lr -d -p 5000:5000 registry
+
+2 Download an alpine image
+  docker pull alpine
+
+3 Tag ( link) the alpine with the local registry
+  docker tag alpine localhost:5000/alpine
+
+4 Push the image to local registry
+  docker push localhost:5000/alpine
+
+the image can be present in the local host and the team members can be access the image who ever can use the server
+
+=======================================================================
+cmdr - like gitbash 

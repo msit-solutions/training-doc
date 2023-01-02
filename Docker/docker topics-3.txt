@@ -1,0 +1,142 @@
+UseCase
+=============
+Create a custom bridge network and create a docker compose file
+to start postgres and adminer container on the above created
+network
+
+1 Create a custom bridge network
+  docker network create --driver bridge --subnet 10.0.0.0/24 tech
+
+2 Create a docker compose file
+  vim docker-compose.yml
+---
+version: '3.0'
+
+services:
+ db:
+  image: postgres
+  environment:
+   POSTGRES_PASSWORD: tech
+   POSTGRES_USER: myuser
+   POSTGRES_DB: mydb
+
+ adminer:
+  image: adminer
+  ports:
+   - 8888:8080
+
+networks:
+ default: 
+   name: tech
+...
+
+3 To create the containers
+  docker-compose up -d
+
+4 To see if adminer and postgres contianers are created
+  docker container ls
+
+5 To check if they are running on tech network
+  docker inspect container_id_from_Step4
+
+
+==========================================================================
+Docker compose file to create 2 networks and run  containers  on different network
+vim docker-compose.yml
+---
+version: '3.0'
+
+services:
+ mydb:
+  image: jenkins/jenkins
+  ports:
+   - 5050:8080
+  networks:
+   - abc
+
+ qaserver:
+  image: tomee
+  ports:
+   - 6060:8080
+  networks:
+   - xyz
+
+ prodserver:
+  image: tomee
+  ports:
+   - 7070:8080
+  networks:
+   - xyz
+
+networks:
+ abc: {}
+ xyz: {}
+...
+==============================================================================
+==========================================================================
+Docker compose file to create  2 containers and also create 2 volumes for both the containers
+---
+version: '3.8'
+
+services:
+ db:
+  image: mysql:5
+  environment:
+   MYSQL_ROOT_PASSWORD: intelliqit
+ volumes:
+   mydb:/var/lib/mysql
+
+ wordpress:
+  image: wordpress
+  ports:
+   - 9999:80
+ volumes:
+   wordpress:/var/www/html
+
+
+volumes:
+  mydb: /var/lib/mysql
+  wordpress: /var/www/html
+
+To start the service
+docker-compose up -d
+
+To see the list of volumes
+docker volume ls
+
+=========================================================================
+Create a dockerfile and use it directly in docker-compsoe  
+
+vim dockerfile
+
+FROM jenkins/jenkins
+USER root
+MAINTAINER hari
+RUN apt-get update
+RUN apt-get install -y git
+
+docker build -t jenkins .
+
+vim docker-compose.yml
+version: '3.8'
+
+services:
+ jenkins:
+  build: .
+  ports:
+   - 7070:8080
+  container_name: jenkins
+
+ mytomcat:
+  image: tomee
+  ports:
+   - 6060:8080
+  container_name: mytomcat
+...
+
+
+To start the services
+docker-compose up
+
+===========================================================
+
