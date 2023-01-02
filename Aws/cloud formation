@@ -1,0 +1,85 @@
+AWS Lambda is a serverless compute service that runs your code in response to events and
+ automatically manages the underlying compute resources for you
+
+LAMBDA PRICING
+  
+With AWS Lambda, you pay only for what you use. 
+
+You are charged based on the number of requests for your functions and the duration, 
+the time it takes for your code to execute.
+
+The AWS Lambda free usage tier includes 1M free requests per
+month and 400,000 GB-seconds of compute time per month.
+
+LAMBDA CONCURRENCY 
+
+Concurrency is the number of requests that your function is
+serving at any given time. 
+When your function is invoked, Lambda allocates an instance of it to process the event. 
+When the function code finishes running, it can handle another request.
+
+        RESOURCE                                                 Default quota                   CAN BE INCREASED UP To
+
+Concurrent executions                                               1,000                          Hundreds of thousands
+                                                                                       
+
+Storage for uploaded functions (.zip file 75 GB Terabytes            75GB                           terrabytes
+archives) and layers. Each function version.
+	
+steps for creation: 
+
+>> Go to managament console of Aws
+>> search for the lambda on search console
+>> on lambda service console create a function.
+>> select from 	Author from scratch option .
+>> give the name of the function,select the run time as python.
+>> select the permissions you can  select Create a new role with basic Lambda permissions. 
+>> create the function .
+
+* To invoke or test your function you need to create your event first.
+>> got to test option in the below section need to create a event 
+>> give the event name and save the function and test.
+>> it will show the the code has been execution results succeded.
+>> we can see the logs of code  in the cloud watch 
+>> go to the cloud watch service.
+>> go to log groups you will see the function of lambda and their logs.
+ ( this logs has been showing beacuse of creation of the role while creation.)
+
+* we can also make lambda function run using triggers ( api gateway)
+
+[  API gateway is an API management tool that sits between a client and a collection of backend services
+   ex: What is an example of an API gateway?
+The popular example of API Gateway is Netflix API Gateway. 
+The Netflix streaming services are available on hundreds of different kinds of devices such as televisions, set-top boxes, smartphones, tablets, etc. It attempts to provide a 
+one-size-fits-all API for its streaming service.
+>> on dashbord of the function you can see the add triggers option click on it
+>> add the api-gateway 
+>> create a new api 
+>> on security click on the open option	and then click on add 
+>> go to the configuration setting in that select triggers
+>> we can see the api gateway  take the api endpoint 
+>> copy the end point on the browser so that the function will be invoke the the result can be seen on browser.   
+
+CLOUD FORMATION 
+
+CLOUD FORMATION 
+
+AWS CloudFormation simplifies provisioning and management on AWS. 
+You can create templates for the service or application architectures 
+you want and have AWS CloudFormation use those templates for quick and reliable provisioning of the services or applications (called “stacks”). 
+You can also easily update or replicate the stacks as needed.
+
+steps for creation:
+
+
+>> Go to managament console of Aws
+>> search for the cloud formation on search bar of  console
+( creation of s3 bucket using cloud formation)
+>> go to stack actions and select with new resources.
+>> create a stack select a create template in designer 
+>> In the Resource types select s3 and select bucket and  drag it on to the console 
+   so that we can see the code has been auto generated.
+>> click on top you can validate the code of bucket creation and also click on create stack
+>> go with default in stack creation
+>> create the stack name go with defaults
+>> go to the s3 you will see the s3 bucket created  with customized name 
