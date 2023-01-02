@@ -1,0 +1,133 @@
+Stage 1 (Continuous Download)
+====================================
+1 Open the dashboard of Jenkins
+2 Click on New item---->enter item name as "Development"
+3 Select Free style project---->OK
+4 Go to Source code management
+5 Select Git
+6Enter GitHub url where developers have uploaded the code
+  https://github.com/ravdy/hello-world
+7 Click on Apply--->Save
+8 Go to the dashboard of Jenkins
+9 Click on Build icon
+   This job will download all the code from GitHub repository
+   into the Jenkins server AWS instance
+
+----------------------------------------------------------------------
+Stage 2 (Continuous Build)
+================================
+1 Open the dashboard of Jenkins
+2 Go to the Development job--->Click on Configure
+3 Go to Build section
+4 Click on "Add build step"
+5 Click on "Invoke top level maven target"
+6 Enter Goal as: package
+7 Apply--->Save
+8 Go to the dashboard of Jenkins
+9 Go to the Development job and click on Build icon
+  This job will convert the code into an artifact and this artifact
+  comes in the format of a war file
+==========================================================================
+As on the continuous deployment we need to create a web server  
+Setting up tomcat on QAs-server  in ubuntu linux server
+==============================================================
+1 Connect to QAServer AWS instance using git bash
+
+2 Update the apt repository
+  sudo apt-get update
+
+3 Install tomcat9
+  sudo apt-get install -y tomcat9
+
+4 Install tomcat9-admin
+  sudo apt-get install -y tomcat9-admin
+
+5 Edit the tomcat-users.xml file
+  sudo vim /etc/tomcat9/tomcat-users.xml
+  Delete the entire content of the file and copy paste the below content
+ 
+  <tomcat-users>
+       <user username="krishna" password="krishna" roles="manager-script"/>
+  </tomcat-users> (create your own user name and do not modify the roles)
+
+6 Restart tomcat
+  sudo service tomcat9 restart
+7 7 To access jenkins from browser
+  public_ip_of_Tomcatserver:8080
+
+==================================================
+       
+Stage 3 (Continuous Deployment)
+====================================
+1 Open the dashboard of Jenkins
+2 Click on Manage Jenkins
+3 Click on Manage Plugins
+4 Go to Available section
+5 Search for "Deploy to container" plugin
+6 Click on Install without restart
+7 Go to the dashboard of jenkins
+8 Go to the Development job
+9 Click on Configure
+10 Go to Post build actions
+11 Click on Add post build action
+12 Click on Deploy war/ear to containers
+   war/ear file: **\*.war   Context path: qaapp
+   Click on Add container
+   Select tomcat9
+   Enter tomcat credentials
+    * click on add
+    * enter the username and password 
+      ( the username and password we enter in the tomcat server) 
+   Tomcat url: private_ip_qaserver:8080
+13 Apply--->Save
+14 Go to the dashboard of jenkins
+15 Go to the development job---->Click on build
+   This job will deploy the artifact into the QAServers
+   and to access the application from the level of browser
+   public_ip_qaserver:8080/qaapp
+=======================================================  
+build other project after the project 
+1 go to postbuild actions 
+2 click on the build other project option
+3 give the name of yhe project should be build 
+4 click on apply and save
+
+
+Jenkins Activity
+============================
+1 Open the dashboard of Jenkins
+2 Click on New item--->Enter some item name--->Select freestyle Project
+3 Go to Pipeline section
+4 In Definition select Pipeline script from SCM
+5 Select SCM as Git
+6 Enter the GitHub url where developer has uploaded the code
+7 Go to Build triggers
+8 Click on POLL SCM and in Schedule section: * * * * *
+9 Click on Apply--->Save
+=========================================
+
+clone of the project repository
+================================
+1 Change the directory  
+  cd desktop
+
+2 Clone the maven repository
+  git clone https://github.com/ravdy/hello-world
+
+3 Move into this cloned repository and delete. git folder
+  cd msit-javacode-for-jenkins  
+  rm -rf. git
+
+4 Initilise a new git repository
+  git init
+
+5 Send the all files into stagging area and local repository
+  git add.
+  git commit -m " maven based project "
+
+6 Open github.com---->Create a new repository
+
+7 Push all the branches from local machine to remote github
+   git push origin --all
+
+================================================

@@ -1,0 +1,208 @@
+=======================================================================================================================================
+****this the method for the post success and failure senerio ******
+=========================================================================================================================
+
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                git 'give here the git repo'
+            }
+        }
+         stage('ContinuousBuild')
+        {
+            steps
+            {
+                 script: 'mvn package'
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.31.15:/var/lib/tomcat8/webapps/testwebapp.war'
+            }
+        }
+        
+       
+    }
+    post ( this stage is continous-Delivery where the delivery manager or the head of the team must be taken the aproval) 
+    {
+        success
+        {
+            input message: 'Waiting for Approval!', submitter: 'naresh'
+               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.26.41:/var/lib/tomcat8/webapps/prodwebapp.war' 
+        }
+        failure
+        {
+            mail bcc: '', body: '', cc: '', from: '', replyTo: '', subject: 'Jenkins CI-CD Failed', to: 'deliverymanager@gmail.com'
+        }      
+    
+    }
+}
+
+================================================================================================================================================
+***** try and catch method of pipeline *****
+===============================================================================================================================================
+
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                script
+                {
+                   try
+                   {
+                       git 'give here the git repo'
+                   }
+                   catch(Exception e1)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to download from remote github', cc: '', from: '', replyTo: '', subject: 'Download failed', to: 'gitadmin@outlook.com'
+                       exit(1)
+                   }
+                }
+               
+            }
+        }
+         stage('ContinuousBuild')
+        {
+            steps
+            {
+                script
+                {
+                   try
+                   {
+                       sh label: '', script: 'mvn package'
+                   }
+                   catch(Exception e2)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to create an artifact from the code', cc: '', from: '', replyTo: '', subject: 'Build failed', to: 'developers@outlook.com'
+                      exit(1)
+                   }
+                }
+               
+            }
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                script
+                {
+                   try
+                   {
+                      sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.31.15:/var/lib/tomcat8/webapps/testwebapp.war'
+                   }
+                   catch(Exception e3)
+                   {
+                       mail bcc: '', body: 'Jenkins is unable to deploy into tomcat on the QaServers', cc: '', from: '', replyTo: '', subject: 'Deployment failed', to: 'middleware@outlook.com'
+                       exit(1)
+                   }
+                }
+                
+            }
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                script
+                {
+                                    
+                    try
+                    {
+                        git 'here we can give the testing repo'
+                       sh label: '', script: 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline/testing.jar'
+                    }
+                    catch(Exception e4)
+                    {
+                       mail bcc: '', body: 'Functional testing of the app on QAServers failed', cc: '', from: '', replyTo: '', subject: 'Testing failed', to: 'testers@outlook.com'
+                       exit(1)
+                    }
+                }
+                
+            }
+        }
+        stage('ContinuousDelivery')
+        {
+            steps
+            {
+                script
+                {
+                   try
+                   { 
+                        input message: 'Waiting for Approval!', submitter: 'naresh'
+                        sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.26.41:/var/lib/tomcat8/webapps/prodwebapp.war' 
+                    }
+                    catch(Exception e5)
+                    {
+                         mail bcc: '', body: 'Unable to deploy into ProdServers', cc: '', from: '', replyTo: '', subject: 'Delivery failed', to: 'delevery@outlook.com'
+                    }
+                }
+            }
+        }
+       
+    } 
+    
+}
+==============================================================================================================================================
+***** This is the normal pipeline method with out using the any methods *****
+==============================================================================================================================================
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('ContinuousDownload')
+        {
+            steps
+            {
+                git 'give here the git repo '
+            }
+        }
+        stage('ContinuousBuild')
+        {
+            steps
+            {
+              sh label: '', script: 'mvn package'
+            }
+                
+        }
+        stage('ContinuousDeployment')
+        {
+            steps
+            {
+                sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.31.15:/var/lib/tomcat8/webapps/testwebapp.war'
+            }
+            
+        }
+        stage('ContinuousTesting')
+        {
+            steps
+            {
+                git 'give here the testing repo'
+                sh label: '', script: 'java -jar /home/ubuntu/.jenkins/workspace/DeclarativePipeline/testing.jar'
+            }
+        }
+        stage('ContinuousDelivery')
+        {
+           steps
+           {
+               input message: 'Waiting for Approval from the DM!', submitter: 'naresh'
+               sh label: '', script: 'scp /home/ubuntu/.jenkins/workspace/DeclarativePipeline/webapp/target/webapp.war ubuntu@172.31.26.41:/var/lib/tomcat8/webapps/prodwebapp.war'
+           }
+        }
+    }
+    
+}
+=============================================================================================================================================================

@@ -1,0 +1,155 @@
+Jenkins is, fundamentally, an automation engine which supports a number of automation patterns. 
+* Pipeline adds a powerful set of automation tools onto Jenkins, 
+* supporting use cases that span from simple continuous integration to comprehensive CD pipelines. 
+* By modeling a series of related tasks, users can take advantage of the many features of Pipeline:
+ Features of the pipelines :
+
+> Code: Pipelines are implemented in code and typically checked into source control, giving teams 
+        the ability to edit, review, and iterate upon their delivery pipeline.
+
+> Durable: Pipelines can survive both planned and unplanned restarts of the Jenkins controller.
+
+> Pausable: Pipelines can optionally stop and wait for human input or approval before continuing the Pipeline run.
+
+> Versatile: Pipelines support complex real-world CD requirements, including the ability to fork/join, loop, and perform work in parallel.
+
+> Extensible: The Pipeline plugin supports custom extensions to its DSL [1] and multiple options for integration with other plugins.
+
+======================================================================================================================
+In pipelines there are two type of codes:
+1. Scripted pipeline
+2. Declarative pipeline
+================================================
+Scripted pipeline 
+=====================
+The scripted pipeline is a traditional way of writing the Jenkins pipeline as code. 
+ Ideally, a Scripted pipeline is written in the Jenkins file on the web UI of Jenkins.
+ Unlike the Declarative pipeline, the scripted pipeline strictly uses groovy based syntax.
+
+Syntax of Scripted Pipeline
+================================
+node (built-in)
+{
+   stage('Stage name in ci-cd')
+   {
+     Groovy code to implement this stage
+   }
+}
+========================================================
+Declarative pipeline
+===============================
+
+The Declarative pipeline is a new feature that is added to create the pipeline. 
+This is basically written in a Jenkinsfile which can be stored into a source code management system such as Git.
+Declarative pipelines is an ideal solution for the simple continuous delivery pipeline
+as it has very limited and pre-defined structure.
+
+Syntax of Declarative Pipeline
+===================================
+pipeline
+{
+  agent any
+  stages
+  {
+    stage('Stage name in CI-CD')
+    {
+      steps
+      {
+         Groovy code to implement this stage
+      }
+    }
+}
+====================================================================================================================
+1 Open the dashboard of Jenkins
+2 Click on New item---->enter item name as "Scripted-pipeline"
+3 Select Pipeline project---->OK
+4 Go to pipeline section in project
+5 click on the pipeline syntax below and open in new tab
+6 In pipeline syntax search for the node:allocate node and enter the label as build-in
+  click on the generate the pipeline script and copy paste the line in the project in pipeline section
+
+7 In pipeline syntax search for the stage:stage and enter the stage name as Continous download 
+  click on the generate the pipeline script and copy paste the line in the project in pipeline section
+
+8 In the stage of continuous Download enter the git repo 
+  go pipeline syntax search for the git:git enter the repo link https://github.com/msit-solutions/msit-javacode-for-jenkins.git
+  click on the generate the pipeline script and copy paste the line in the project in pipeline section 
+
+9 In pipeline syntax search for the stage:stage and enter the stage name as Continous build 
+  click on the generate the pipeline script and copy paste the line in the project in pipeline section
+
+10 In the stage of continuous build enter the mvn package 
+   go pipeline syntax search for the sh:shell script enter shell script as mvn package
+   click on the generate the pipeline script and copy paste the line in the project in pipeline section
+
+11 In pipeline syntax search for the stage:stage and enter the stage name as Continous deployment
+   click on the generate the pipeline script and copy paste the line in the project in pipeline section
+
+12 In the stage of continuous deployment enter the tomcat credentails 
+   * go pipeline syntax search for the Deploy:Deploy war/ear to a container
+   * enter the war/ear files as **\*.war .
+   * enter the context path as sample .
+   * Click on Add container
+   Select tomcat9
+   Enter tomcat credentials
+    * click on add
+    * enter the username and password 
+      ( the username and password we enter in the tomcat server) 
+     Tomcat url: private_ip_qaserver:8080
+    click on the generate the pipeline script and copy paste the line in the project in pipeline section
+13 Apply--->Save
+14 Go to the dashboard of jenkins
+15 Go to the Scripted-pipeline job---->Click on build
+  public_ip_qaserver:8080/sample
+
+after completion of the above steps the pipeline will be output could be as below
+      
+scripted pipeline
+node('built-in') 
+{
+  stage('ContinuousDownload') 
+  {
+    git 'https://github.com/msit-solutions/msit-javacode-for-jenkins.git'
+  }
+  stage('ContinuousBuild')
+  {
+    sh 'mvn package'
+  }
+  stage('ContinuousDeployment')
+ {
+ deploy adapters: [tomcat9(credentialsId: '92eac156-5912-47a8-ac13-7f14e4df00c8', path: '', url: 'http://172.31.14.193:8080/')], contextPath: 'sample', war: '**\\*.war'
+ }                                                                                                  ( change the private ip )
+}
+==================================================================================
+Declartive pipeline will be as same as related to  scripted pipeline the pipeline will be look like below 
+
+pipeline
+{
+    agent any
+    stages
+    {
+        stage('Continuous Download')
+        {
+            steps
+            {
+                git 'https://github.com/msit-solutions/msit-javacode-for-jenkins.git'
+            }
+        }
+        stage('Continuous Build')
+        {
+            steps
+            {
+              sh 'mvn package'
+            }
+        }
+        stage('Continuous Deployment')
+        {
+            steps
+            {
+               deploy adapters: [tomcat9(credentialsId: '92eac156-5912-47a8-ac13-7f14e4df00c8', path: '', url: 'http://172.31.14.193:8080/')], contextPath: 'sample', war: '**\\*.war'
+             }                                                                                                ( change the private ip )
+        }
+ 
+}
+
+=============================================================================================================             
